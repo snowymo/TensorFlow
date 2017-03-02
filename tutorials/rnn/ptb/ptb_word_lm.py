@@ -109,14 +109,14 @@ class PTBModel(object):
     # initialized to 1 but the hyperparameters of the model would need to be
     # different than reported in the paper.
     def lstm_cell():
-      return tf.contrib.rnn.BasicLSTMCell(
+      return tf.nn.rnn_cell.BasicLSTMCell(
           size, forget_bias=0.0, state_is_tuple=True)
     attn_cell = lstm_cell
     if is_training and config.keep_prob < 1:
       def attn_cell():
-        return tf.contrib.rnn.DropoutWrapper(
+        return tf.nn.rnn_cell.DropoutWrapper(
             lstm_cell(), output_keep_prob=config.keep_prob)
-    cell = tf.contrib.rnn.MultiRNNCell(
+    cell = tf.nn.rnn_cell.MultiRNNCell(
         [attn_cell() for _ in range(config.num_layers)], state_is_tuple=True)
 
     self._initial_state = cell.zero_state(batch_size, data_type())
@@ -146,12 +146,12 @@ class PTBModel(object):
         (cell_output, state) = cell(inputs[:, time_step, :], state)
         outputs.append(cell_output)
 
-    output = tf.reshape(tf.concat(outputs, 1), [-1, size])
+    output = tf.reshape(tf.concat_v2(outputs, 1), [-1, size])
     softmax_w = tf.get_variable(
         "softmax_w", [size, vocab_size], dtype=data_type())
     softmax_b = tf.get_variable("softmax_b", [vocab_size], dtype=data_type())
     logits = tf.matmul(output, softmax_w) + softmax_b
-    loss = tf.contrib.legacy_seq2seq.sequence_loss_by_example(
+    loss = tf.nn.seq2seq.sequence_loss_by_example(
         [logits],
         [tf.reshape(input_.targets, [-1])],
         [tf.ones([batch_size * num_steps], dtype=data_type())])

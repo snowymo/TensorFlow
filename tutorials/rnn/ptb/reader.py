@@ -69,6 +69,7 @@ def ptb_raw_data(data_path=None):
   train_path = os.path.join(data_path, "ptb.train.txt")
   valid_path = os.path.join(data_path, "ptb.valid.txt")
   test_path = os.path.join(data_path, "ptb.test.txt")
+  #train_path = "/Users/zhenyihe/NYUDrive/Backup/Private/MRL/project/RNNLSTM/tutorials/rnn/ptb/data/ptb.char.train.txt"
 
   word_to_id = _build_vocab(train_path)
   train_data = _file_to_word_ids(train_path, word_to_id)
@@ -114,9 +115,9 @@ def ptb_producer(raw_data, batch_size, num_steps, name=None):
 
     i = tf.train.range_input_producer(epoch_size, shuffle=False).dequeue()
     x = tf.strided_slice(data, [0, i * num_steps],
-                         [batch_size, (i + 1) * num_steps])
+                         [batch_size, (i + 1) * num_steps], [1,1])
     x.set_shape([batch_size, num_steps])
     y = tf.strided_slice(data, [0, i * num_steps + 1],
-                         [batch_size, (i + 1) * num_steps + 1])
+                         [batch_size, (i + 1) * num_steps + 1], [1,1])
     y.set_shape([batch_size, num_steps])
     return x, y
